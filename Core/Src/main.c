@@ -22,6 +22,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <math.h>
 
 /* USER CODE END Includes */
 
@@ -77,7 +78,9 @@ static void MX_LTDC_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+float MIDINoteToFrequency(uint8_t note){
+	return 440.0f*powf(2.0f, (note - 69.0f)/12.0f);
+}
 /* USER CODE END 0 */
 
 /**
@@ -121,7 +124,7 @@ int main(void)
   MX_LTDC_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-  //AudioEngine_Init();
+  AudioEngine_Init();
   //AudioEngine_PlayTestTone();
   /* USER CODE END 2 */
 
@@ -643,16 +646,15 @@ void USBD_MIDI_OnPacketsReceived(uint8_t *data, uint8_t len)
     uint8_t param1 = data[i + 2];         // Pierwszy bajt danych (np. numer nuty)
     uint8_t param2 = data[i + 3];         // Drugi bajt danych (np. prędkość)
 
-    // Tutaj dodaj logikę swojej aplikacji, np.:
-    // if (message == 0x09) // Note On
-    // {
-    //   // Uruchom generator dźwięku dla nuty 'param1' z głośnością 'param2'
-    //   // ...i wyślij na DAC2
-    // }
-    // else if (message == 0x08) // Note Off
-    // {
-    //   // Zatrzymaj generator dźwięku dla nuty 'param1'
-    // }
+    if (message == 0x09) // Note On
+    {
+    	float freq = MIDINoteToFrequency(param1);
+    	AudioEngine_PlayNote(param1, freq);
+    }
+    else if (message == 0x08 || (message == 0x09 && param2 == 0)) // Note Off or velocity = 0
+    {
+    	AudioEngine_StopNore(param1);
+    }
   }
 }
 
