@@ -121,8 +121,8 @@ int main(void)
   MX_LTDC_Init();
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
-  AudioEngine_Init();
-  AudioEngine_PlayTestTone();
+  //AudioEngine_Init();
+  //AudioEngine_PlayTestTone();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -130,7 +130,8 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
-
+	HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+	HAL_Delay(1000);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
@@ -622,6 +623,38 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+/**
+  * @brief  Obsługa pakietów MIDI otrzymanych z hosta (np. DAW).
+  * Ta funkcja nadpisuje słabą definicję z usbd_midi.c
+  * @param  data: wskaźnik do bufora z danymi
+  * @param  len: długość danych w bajtach
+  */
+void USBD_MIDI_OnPacketsReceived(uint8_t *data, uint8_t len)
+{
+  // Pętla przetwarzająca wszystkie pakiety w buforze
+  // (Każdy pakiet MIDI ma 4 bajty)
+  for (uint16_t i = 0; i < len; i += 4)
+  {
+    uint8_t cable = data[i + 0] >> 4;     // Numer portu (kabla)
+    uint8_t code = data[i + 0] & 0x0F;    // Code Index Number (CIN)
+    uint8_t message = data[i + 1] >> 4;   // Wiadomość (np. 0x9 = Note On)
+    uint8_t channel = data[i + 1] & 0x0F; // Kanał MIDI (0-15)
+    uint8_t param1 = data[i + 2];         // Pierwszy bajt danych (np. numer nuty)
+    uint8_t param2 = data[i + 3];         // Drugi bajt danych (np. prędkość)
+
+    // Tutaj dodaj logikę swojej aplikacji, np.:
+    // if (message == 0x09) // Note On
+    // {
+    //   // Uruchom generator dźwięku dla nuty 'param1' z głośnością 'param2'
+    //   // ...i wyślij na DAC2
+    // }
+    // else if (message == 0x08) // Note Off
+    // {
+    //   // Zatrzymaj generator dźwięku dla nuty 'param1'
+    // }
+  }
+}
 
 /* USER CODE END 4 */
 
