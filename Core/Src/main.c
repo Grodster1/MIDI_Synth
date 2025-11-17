@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <math.h>
+#include <stdio.h>
+#include "audio_engine.h"
 
 /* USER CODE END Includes */
 
@@ -81,6 +83,15 @@ static void MX_LTDC_Init(void);
 float MIDINoteToFrequency(uint8_t note){
 	return 440.0f*powf(2.0f, (note - 69.0f)/12.0f);
 }
+
+int _write(int file, char *ptr, int len) {
+    HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, HAL_MAX_DELAY);
+    return len;
+}
+
+const char* NOTE_NAMES[] = {
+    "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+};
 /* USER CODE END 0 */
 
 /**
@@ -446,7 +457,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 31250;
+  huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -635,25 +646,29 @@ static void MX_GPIO_Init(void)
   */
 void USBD_MIDI_OnPacketsReceived(uint8_t *data, uint8_t len)
 {
-  // Pętla przetwarzająca wszystkie pakiety w buforze
   // (Każdy pakiet MIDI ma 4 bajty)
   for (uint16_t i = 0; i < len; i += 4)
   {
     uint8_t cable = data[i + 0] >> 4;     // Numer portu (kabla)
     uint8_t code = data[i + 0] & 0x0F;    // Code Index Number (CIN)
-    uint8_t message = data[i + 1] >> 4;   // Wiadomość (np. 0x9 = Note On)
-    uint8_t channel = data[i + 1] & 0x0F; // Kanał MIDI (0-15)
-    uint8_t param1 = data[i + 2];         // Pierwszy bajt danych (np. numer nuty)
-    uint8_t param2 = data[i + 3];         // Drugi bajt danych (np. prędkość)
+    uint8_t message = data[i + 1] >> 4;   // Wiadomość (0x9 = Note On, 0x8 = Note Off)
+    uint8_t channel = data[i + 1] & 0x0F; // Kanał MIDI
+    uint8_t note_num = data[i + 2];         // Pierwszy bajt danych (numer nuty)
+    uint8_t vel = data[i + 3];         // Drugi bajt danych (velocity)
 
-    if (message == 0x09) // Note On
+    const char* note_name =NOTE_NAMES[note_num % 12];
+    int octave = (note_num / 12) - 1;
+
+    if (message == 0x09 && vel > 0) // Note On
     {
-    	float freq = MIDINoteToFrequency(param1);
-    	AudioEngine_PlayNote(param1, freq);
+    	//float freq = MIDINoteToFrequency(note_num);
+    	//AudioEngine_PlayNote(note_num, freq);
+    	printf("[MIDI] Note On: %s%d (Note: %d) | Vel: %d | Ch: %d\r\n", note_name, octave, note_num, vel, channel);
     }
-    else if (message == 0x08 || (message == 0x09 && param2 == 0)) // Note Off or velocity = 0
+    else if (message == 0x08 || (message == 0x09 && vel == 0)) // Note Off or velocity = 0
     {
-    	AudioEngine_StopNore(param1);
+    	printf("[MIDI] Note OFF: %s%d (Note: %d)\r\n", note_name, octave, note_num);
+    	//AudioEngine_StopNore(note_num);
     }
   }
 }

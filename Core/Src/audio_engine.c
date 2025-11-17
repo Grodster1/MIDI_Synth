@@ -9,7 +9,7 @@
 
 #define SAMPLE_RATE 44100
 #define AUDIO_BUFFER_SIZE 256
-#define MAX_FREQUENCY 2000.0f
+#define MAX_AMPLITUDE 2000.0f
 
 typedef struct{
 	uint8_t active;
@@ -31,7 +31,7 @@ extern TIM_HandleTypeDef htim6;
 
 void AudioEngine_Init(void){
     // Clear voices
-    memset(voices, 0, sizeof(voicesbuffer));
+    memset(voices, 0, sizeof(voices));
 
     for(int i = 0; i < AUDIO_BUFFER_SIZE; i++){
         audio_buffer[i] = 2048; // Silence (middle point for 12-bit DAC)
@@ -56,27 +56,23 @@ static Voice* find_free_voice(uint8_t note){
 	uint32_t max_duration = 0;
 	uint8_t oldest_voice_index = 0;
 	for(int j = 0; j < MAX_VOICES; ++j){
-		uint32_t duration = current_time - voices[i].start_time;
+		uint32_t duration = current_time - voices[j].start_time;
 		if(duration > max_duration){
 			max_duration = duration;
-			oldest_voice_index = ii;
+			oldest_voice_index = j;
 		}
 	}
 
 	return &voices[oldest_voice_index];
 }
 
-void AudioEngine_PlayTestTone(void){
-    phase_step = 440.0f / SAMPLE_RATE; // A4 440 Hz
-    is_playing = 1;
-}
 
 void AudioEngine_PlayNote(uint8_t note, float frequency){
     Voice* voice = find_free_voice(note);
     voice->active = 1;
     voice->note = note;
     voice->phase = 0.0f;
-    voice->phase_step = phase/SAMPLE_RATE;
+    voice->phase_step = voice->phase/SAMPLE_RATE;
     voice->start_time = HAL_GetTick();
 }
 
@@ -108,7 +104,7 @@ void fill_audio_buffer(uint16_t* buffer, uint16_t size){
 			}
 		}
 		mixed_sample = (mixed_sample / MAX_VOICES) * MAX_AMPLITUDE;
-		buffer[i] = 2048 + (uint16_t)(mixed_ample);
+		buffer[i] = 2048 + (uint16_t)(mixed_sample);
 	}
 }
 

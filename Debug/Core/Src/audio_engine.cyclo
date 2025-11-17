@@ -1,8 +1,8 @@
-../Core/Src/audio_engine.c:22:6:AudioEngine_Init	1
-../Core/Src/audio_engine.c:37:6:AudioEngine_PlayTestTone	1
-../Core/Src/audio_engine.c:42:6:AudioEngine_PlayNote	1
-../Core/Src/audio_engine.c:47:6:AudioEngine_Stop	1
-../Core/Src/audio_engine.c:51:6:AudioEngine_ProcessBuffer	1
-../Core/Src/audio_engine.c:55:6:fill_audio_buffer	4
-../Core/Src/audio_engine.c:75:6:HAL_DAC_ConvCpltCallbackCh2	1
-../Core/Src/audio_engine.c:79:6:HAL_DAC_ConvHalfCpltCallbackCh2	1
+../Core/Src/audio_engine.c:32:6:AudioEngine_Init	2
+../Core/Src/audio_engine.c:47:15:find_free_voice	5
+../Core/Src/audio_engine.c:70:6:AudioEngine_PlayNote	1
+../Core/Src/audio_engine.c:79:6:AudioEngine_Stop	4
+../Core/Src/audio_engine.c:88:6:AudioEngine_ProcessBuffer	1
+../Core/Src/audio_engine.c:92:6:fill_audio_buffer	5
+../Core/Src/audio_engine.c:111:6:HAL_DAC_ConvCpltCallbackCh2	1
+../Core/Src/audio_engine.c:115:6:HAL_DAC_ConvHalfCpltCallbackCh2	1
