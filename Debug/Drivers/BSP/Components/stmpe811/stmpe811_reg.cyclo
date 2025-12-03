@@ -1,0 +1,2 @@
+../Drivers/BSP/Components/stmpe811/stmpe811_reg.c:45:9:stmpe811_read_reg	1
+../Drivers/BSP/Components/stmpe811/stmpe811_reg.c:57:9:stmpe811_write_reg	1

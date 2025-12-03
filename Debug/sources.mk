@@ -40,6 +40,9 @@ CPP_DEPS :=
 SUBDIRS := \
 Core/Src \
 Core/Startup \
+Drivers/BSP/Components/ili9341 \
+Drivers/BSP/Components/stmpe811 \
+Drivers/BSP/my_Board \
 Drivers/STM32F4xx_HAL_Driver/Src \
 Middlewares/ST/STM32_USB_Device_Library/Class/HID/Src \
 Middlewares/ST/STM32_USB_Device_Library/Class/MIDI/Src \
