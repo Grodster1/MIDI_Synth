@@ -48,9 +48,6 @@ Drivers/BSP/my_Board/stm32f429i_discovery_ts.o: \
  ../Drivers/BSP/my_Board/../Components/Common/ts.h \
  ../Drivers/BSP/my_Board/../Components/Common/lcd.h \
  ../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811.h \
- ../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811_reg.h \
- ../Drivers/CMSIS/Include/cmsis_compiler.h \
- ../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811_conf.h \
  ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/ts.h \
  ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/io.h \
  ../Drivers/BSP/my_Board/stm32f429i_discovery_io.h
@@ -103,9 +100,6 @@ Drivers/BSP/my_Board/stm32f429i_discovery_ts.o: \
 ../Drivers/BSP/my_Board/../Components/Common/ts.h:
 ../Drivers/BSP/my_Board/../Components/Common/lcd.h:
 ../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811.h:
-../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811_reg.h:
-../Drivers/CMSIS/Include/cmsis_compiler.h:
-../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811_conf.h:
 ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/ts.h:
 ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/io.h:
 ../Drivers/BSP/my_Board/stm32f429i_discovery_io.h:

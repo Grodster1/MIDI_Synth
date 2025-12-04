@@ -5,16 +5,13 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../Drivers/BSP/Components/stmpe811/stmpe811.c \
-../Drivers/BSP/Components/stmpe811/stmpe811_reg.c 
+../Drivers/BSP/Components/stmpe811/stmpe811.c 
 
 C_DEPS += \
-./Drivers/BSP/Components/stmpe811/stmpe811.d \
-./Drivers/BSP/Components/stmpe811/stmpe811_reg.d 
+./Drivers/BSP/Components/stmpe811/stmpe811.d 
 
 OBJS += \
-./Drivers/BSP/Components/stmpe811/stmpe811.o \
-./Drivers/BSP/Components/stmpe811/stmpe811_reg.o 
+./Drivers/BSP/Components/stmpe811/stmpe811.o 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -24,7 +21,7 @@ Drivers/BSP/Components/stmpe811/%.o Drivers/BSP/Components/stmpe811/%.su Drivers
 clean: clean-Drivers-2f-BSP-2f-Components-2f-stmpe811
 
 clean-Drivers-2f-BSP-2f-Components-2f-stmpe811:
-	-$(RM) ./Drivers/BSP/Components/stmpe811/stmpe811.cyclo ./Drivers/BSP/Components/stmpe811/stmpe811.d ./Drivers/BSP/Components/stmpe811/stmpe811.o ./Drivers/BSP/Components/stmpe811/stmpe811.su ./Drivers/BSP/Components/stmpe811/stmpe811_reg.cyclo ./Drivers/BSP/Components/stmpe811/stmpe811_reg.d ./Drivers/BSP/Components/stmpe811/stmpe811_reg.o ./Drivers/BSP/Components/stmpe811/stmpe811_reg.su
+	-$(RM) ./Drivers/BSP/Components/stmpe811/stmpe811.cyclo ./Drivers/BSP/Components/stmpe811/stmpe811.d ./Drivers/BSP/Components/stmpe811/stmpe811.o ./Drivers/BSP/Components/stmpe811/stmpe811.su
 
 .PHONY: clean-Drivers-2f-BSP-2f-Components-2f-stmpe811
 

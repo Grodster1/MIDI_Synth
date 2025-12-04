@@ -20,6 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "project_conf.h"
 #include "stm32f429i_discovery.h"
+#include "main.h"
 /** @defgroup BSP BSP
   * @{
   */
@@ -1094,6 +1095,8 @@ HAL_StatusTypeDef EEPROM_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials)
 /**
   * @}
   */
+
+
 
 /**
   * @}

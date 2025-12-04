@@ -25,14 +25,13 @@
 #include <math.h>
 #include <stdio.h>
 #include "audio_engine.h"
+#include "gui.h"
 #include "project_conf.h"
 #include "stm32f429i_discovery_io.h"
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_sdram.h"
 #include "stm32f429i_discovery_ts.h"
 #include "stm32f429i_discovery.h"
-#include "stmpe811_conf.h"
-#include "stmpe811_reg.h"
 #include "stmpe811.h"
 #include "ili9341.h"
 #include "io.h"
@@ -48,7 +47,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define LCD_FRAME_BUFFER_LAYER0  0xD0000000
+#define STMPE811_ADDR 0x82
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -86,6 +86,8 @@ LCD_DrvTypeDef ili9341_drv =
   ili9341_GetLcdPixelHeight,
   0,0,
 };
+
+uint32_t background_color = LCD_COLOR_WHITE;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,7 +103,11 @@ static void MX_I2C3_Init(void);
 static void MX_LTDC_Init(void);
 static void MX_SPI5_Init(void);
 /* USER CODE BEGIN PFP */
-
+void I2Cx_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
+uint8_t I2Cx_Read(uint8_t Addr, uint8_t Reg);
+void I2Cx_ReadBuffer(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint16_t Length);
+void I2Cx_Error(uint8_t Addr);
+void I2C3_ClearBusyFlagErratum(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -118,8 +124,6 @@ int _write(int file, char *ptr, int len) {
 const char* NOTE_NAMES[] = {
     "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
 };
-
-#define LCD_FRAME_BUFFER_LAYER0  0xD0000000
 
 /* USER CODE END 0 */
 
@@ -140,9 +144,6 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
-  // Start timer dla próbkowania audio
- // HAL_TIM_Base_Start(&htim6);
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -160,59 +161,33 @@ int main(void)
   MX_USART1_UART_Init();
   MX_DMA2D_Init();
   MX_FMC_Init();
+
+  /* Reset I2C3 */
+  I2C3_ClearBusyFlagErratum();
+  __HAL_RCC_I2C3_FORCE_RESET();
+  HAL_Delay(2);
+  __HAL_RCC_I2C3_RELEASE_RESET();
+
+
   MX_I2C3_Init();
   MX_LTDC_Init();
   MX_USB_DEVICE_Init();
   MX_SPI5_Init();
   /* USER CODE BEGIN 2 */
   AudioEngine_Init();
-  //AudioEngine_PlayTestTone();
+  GUI_Init();
 
-
-    if (BSP_SDRAM_Init() != SDRAM_OK)
-    {
-      Error_Handler();
-    }
-
-
-    if (BSP_LCD_Init() != LCD_OK)
-    {
-      Error_Handler();
-    }
-
-
-    BSP_LCD_LayerDefaultInit(0, LCD_FRAME_BUFFER_LAYER0);
-
-
-    BSP_LCD_SelectLayer(0);
-
-
-    BSP_LCD_DisplayOn();
-    BSP_LCD_Clear(LCD_COLOR_WHITE);
-
-
-    BSP_LCD_SetFont(&Font24);
-    BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-    BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
-    BSP_LCD_DisplayStringAt(0, 10, (uint8_t *)"STM32 INIT OK", CENTER_MODE);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	       BSP_LCD_Clear(LCD_COLOR_GREEN);
-	       BSP_LCD_SetBackColor(LCD_COLOR_GREEN);
-	       BSP_LCD_DisplayStringAt(0, 120, (uint8_t *)"GREEN	, CENTER_MODE);
-	       HAL_Delay(1000);
+	  GUI_HandleTouch();
+	  HAL_Delay(10);
+	  /* USER CODE END WHILE */
 
-	       BSP_LCD_Clear(LCD_COLOR_RED);
-	       BSP_LCD_SetBackColor(LCD_COLOR_RED);
-	       BSP_LCD_DisplayStringAt(0, 120, (uint8_t *)"RED, CENTER_MODE);
-	       HAL_Delay(1000);
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
+	  /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
@@ -747,6 +722,83 @@ void USBD_MIDI_OnPacketsReceived(uint8_t *data, uint8_t len)
     	//AudioEngine_StopNore(note_num);
     }
   }
+}
+
+/**
+  * @brief  Implements a software workaround to reset the I2C BUSY flag.
+  * This function manually controls the SCL/SDA pins as GPIOs to unblock
+  * the bus if a slave device (e.g., STMPE811) holds the data line low.
+  * @param  None
+  * @retval None
+  */
+void I2C3_ClearBusyFlagErratum(void)
+{
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    __HAL_RCC_GPIOA_CLK_ENABLE();
+    __HAL_RCC_GPIOC_CLK_ENABLE();
+
+    /* Configure SCL (PA8) as Output Open-Drain */
+    GPIO_InitStruct.Pin = GPIO_PIN_8; // SCL
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+    /* Configure SDA (PC9) as Output Open-Drain */
+    GPIO_InitStruct.Pin = GPIO_PIN_9; // SDA
+    HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+    /* Generate 9 clock pulses to release the SDA line */
+    for (uint8_t i = 0; i < 9; i++) {
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+        HAL_Delay(1);
+        HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_RESET);
+        HAL_Delay(1);
+    }
+
+    /* Generate STOP condition */
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+    HAL_Delay(1);
+    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_9, GPIO_PIN_SET);
+    HAL_Delay(1);
+}
+
+/**
+  * @brief  Writes a single data byte to a specific register of an I2C device.
+  * @param  Addr: I2C device address (7-bit, left-aligned).
+  * @param  Reg: Internal register address to write to.
+  * @param  Value: Data value to write.
+  * @retval None
+  */
+void I2Cx_Write(uint8_t Addr, uint8_t Reg, uint8_t Value) {
+    HAL_I2C_Mem_Write(&hi2c3, Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, &Value, 1, 1000);
+}
+
+/**
+  * @brief  Reads a single data byte from a specific register of an I2C device.
+  * @param  Addr: I2C device address.
+  * @param  Reg: Internal register address to read from.
+  * @retval Read value (uint8_t). Returns 0 if a communication error occurs.
+  */
+uint8_t I2Cx_Read(uint8_t Addr, uint8_t Reg) {
+    uint8_t Value = 0;
+    /* Check if the read operation is successful */
+    if(HAL_I2C_Mem_Read(&hi2c3, Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, &Value, 1, 1000) != HAL_OK) return 0;
+    return Value;
+}
+
+/**
+  * @brief  Reads multiple data bytes (Burst Read) from an I2C device into a buffer.
+  * This is critical for reading X and Y coordinates in a single transaction
+  * to ensure data consistency.
+  * @param  Addr: I2C device address.
+  * @param  Reg: Start register address to read from.
+  * @param  pBuffer: Pointer to the buffer where the read data will be stored.
+  * @param  Length: Number of bytes to read.
+  * @retval None
+  */
+void I2Cx_ReadBuffer(uint8_t Addr, uint8_t Reg, uint8_t *pBuffer, uint16_t Length) {
+    HAL_I2C_Mem_Read(&hi2c3, Addr, (uint16_t)Reg, I2C_MEMADD_SIZE_8BIT, pBuffer, Length, 1000);
 }
 
 /* USER CODE END 4 */

@@ -1,4 +1,5 @@
 "./Core/Src/audio_engine.o"
+"./Core/Src/gui.o"
 "./Core/Src/main.o"
 "./Core/Src/stm32f4xx_hal_msp.o"
 "./Core/Src/stm32f4xx_it.o"
@@ -8,7 +9,6 @@
 "./Core/Startup/startup_stm32f429zitx.o"
 "./Drivers/BSP/Components/ili9341/ili9341.o"
 "./Drivers/BSP/Components/stmpe811/stmpe811.o"
-"./Drivers/BSP/Components/stmpe811/stmpe811_reg.o"
 "./Drivers/BSP/my_Board/stm32f429i_discovery.o"
 "./Drivers/BSP/my_Board/stm32f429i_discovery_io.o"
 "./Drivers/BSP/my_Board/stm32f429i_discovery_lcd.o"

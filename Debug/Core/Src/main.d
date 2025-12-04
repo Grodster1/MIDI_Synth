@@ -43,29 +43,25 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../USB_DEVICE/App/usb_device.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h \
  ../USB_DEVICE/Target/usbd_conf.h ../Core/Inc/audio_engine.h \
- ../Drivers/BSP/my_Board/project_conf.h \
- ../Drivers/BSP/my_Board/stm32f429i_discovery_io.h \
+ ../Core/Inc/gui.h ../Core/Inc/main.h \
+ ../Drivers/BSP/my_Board/stm32f429i_discovery_lcd.h \
  ../Drivers/BSP/my_Board/project_conf.h \
  ../Drivers/BSP/my_Board/stm32f429i_discovery.h \
  ../Drivers/BSP/my_Board/../Components/Common/io.h \
  ../Drivers/BSP/my_Board/../Components/Common/ts.h \
  ../Drivers/BSP/my_Board/../Components/Common/lcd.h \
- ../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811.h \
- ../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811_reg.h \
- ../Drivers/CMSIS/Include/cmsis_compiler.h \
- ../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811_conf.h \
- ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/ts.h \
- ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/io.h \
- ../Drivers/BSP/my_Board/stm32f429i_discovery_lcd.h \
  ../Drivers/BSP/my_Board/stm32f429i_discovery_sdram.h \
  ../Drivers/BSP/my_Board/../../../Utilities/Fonts/fonts.h \
  ../Drivers/BSP/my_Board/../Components/ili9341/ili9341.h \
  ../Drivers/BSP/my_Board/../Components/ili9341/../Common/lcd.h \
- ../Drivers/BSP/my_Board/stm32f429i_discovery_sdram.h \
  ../Drivers/BSP/my_Board/stm32f429i_discovery_ts.h \
+ ../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811.h \
+ ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/ts.h \
+ ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/io.h \
+ ../Drivers/BSP/my_Board/project_conf.h \
+ ../Drivers/BSP/my_Board/stm32f429i_discovery_io.h \
+ ../Drivers/BSP/my_Board/stm32f429i_discovery_sdram.h \
  ../Drivers/BSP/my_Board/stm32f429i_discovery.h \
- ../Drivers/BSP/Components/stmpe811/stmpe811_conf.h \
- ../Drivers/BSP/Components/stmpe811/stmpe811_reg.h \
  ../Drivers/BSP/Components/stmpe811/stmpe811.h \
  ../Drivers/BSP/Components/ili9341/ili9341.h \
  ../Drivers/BSP/Components/Common/io.h \
@@ -117,29 +113,26 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_def.h:
 ../USB_DEVICE/Target/usbd_conf.h:
 ../Core/Inc/audio_engine.h:
-../Drivers/BSP/my_Board/project_conf.h:
-../Drivers/BSP/my_Board/stm32f429i_discovery_io.h:
+../Core/Inc/gui.h:
+../Core/Inc/main.h:
+../Drivers/BSP/my_Board/stm32f429i_discovery_lcd.h:
 ../Drivers/BSP/my_Board/project_conf.h:
 ../Drivers/BSP/my_Board/stm32f429i_discovery.h:
 ../Drivers/BSP/my_Board/../Components/Common/io.h:
 ../Drivers/BSP/my_Board/../Components/Common/ts.h:
 ../Drivers/BSP/my_Board/../Components/Common/lcd.h:
-../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811.h:
-../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811_reg.h:
-../Drivers/CMSIS/Include/cmsis_compiler.h:
-../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811_conf.h:
-../Drivers/BSP/my_Board/../Components/stmpe811/../Common/ts.h:
-../Drivers/BSP/my_Board/../Components/stmpe811/../Common/io.h:
-../Drivers/BSP/my_Board/stm32f429i_discovery_lcd.h:
 ../Drivers/BSP/my_Board/stm32f429i_discovery_sdram.h:
 ../Drivers/BSP/my_Board/../../../Utilities/Fonts/fonts.h:
 ../Drivers/BSP/my_Board/../Components/ili9341/ili9341.h:
 ../Drivers/BSP/my_Board/../Components/ili9341/../Common/lcd.h:
-../Drivers/BSP/my_Board/stm32f429i_discovery_sdram.h:
 ../Drivers/BSP/my_Board/stm32f429i_discovery_ts.h:
+../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811.h:
+../Drivers/BSP/my_Board/../Components/stmpe811/../Common/ts.h:
+../Drivers/BSP/my_Board/../Components/stmpe811/../Common/io.h:
+../Drivers/BSP/my_Board/project_conf.h:
+../Drivers/BSP/my_Board/stm32f429i_discovery_io.h:
+../Drivers/BSP/my_Board/stm32f429i_discovery_sdram.h:
 ../Drivers/BSP/my_Board/stm32f429i_discovery.h:
-../Drivers/BSP/Components/stmpe811/stmpe811_conf.h:
-../Drivers/BSP/Components/stmpe811/stmpe811_reg.h:
 ../Drivers/BSP/Components/stmpe811/stmpe811.h:
 ../Drivers/BSP/Components/ili9341/ili9341.h:
 ../Drivers/BSP/Components/Common/io.h:
