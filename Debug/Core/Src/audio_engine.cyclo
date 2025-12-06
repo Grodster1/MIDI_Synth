@@ -1,8 +1,9 @@
-../Core/Src/audio_engine.c:32:6:AudioEngine_Init	2
-../Core/Src/audio_engine.c:47:15:find_free_voice	5
-../Core/Src/audio_engine.c:70:6:AudioEngine_PlayNote	1
-../Core/Src/audio_engine.c:79:6:AudioEngine_Stop	4
-../Core/Src/audio_engine.c:88:6:AudioEngine_ProcessBuffer	1
-../Core/Src/audio_engine.c:92:6:fill_audio_buffer	5
-../Core/Src/audio_engine.c:111:6:HAL_DAC_ConvCpltCallbackCh2	1
-../Core/Src/audio_engine.c:115:6:HAL_DAC_ConvHalfCpltCallbackCh2	1
+../Core/Src/audio_engine.c:32:6:AudioEngine_Init	4
+../Core/Src/audio_engine.c:63:15:find_free_voice	5
+../Core/Src/audio_engine.c:86:6:AudioEngine_PlayNote	1
+../Core/Src/audio_engine.c:95:6:AudioEngine_StopNote	4
+../Core/Src/audio_engine.c:104:6:AudioEngine_ProcessBuffer	1
+../Core/Src/audio_engine.c:108:6:AudioEngine_SetWaveType	1
+../Core/Src/audio_engine.c:119:6:fill_audio_buffer	11
+../Core/Src/audio_engine.c:192:6:HAL_DACEx_ConvHalfCpltCallbackCh2	1
+../Core/Src/audio_engine.c:199:6:HAL_DACEx_ConvCpltCallbackCh2	1

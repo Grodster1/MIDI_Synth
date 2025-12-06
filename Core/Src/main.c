@@ -125,6 +125,17 @@ const char* NOTE_NAMES[] = {
     "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
 };
 
+uint8_t CheckUserButton(void) {
+    if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET) {
+        HAL_Delay(200);
+        return 1;
+    }
+    return 0;
+}
+
+uint8_t is_button_pressed = 0;
+uint32_t last_button_check_time = 0;
+uint8_t is_music_playing = 0;
 /* USER CODE END 0 */
 
 /**
@@ -161,34 +172,79 @@ int main(void)
   MX_USART1_UART_Init();
   MX_DMA2D_Init();
   MX_FMC_Init();
-
-  /* Reset I2C3 */
-  I2C3_ClearBusyFlagErratum();
-  __HAL_RCC_I2C3_FORCE_RESET();
-  HAL_Delay(2);
-  __HAL_RCC_I2C3_RELEASE_RESET();
-
-
   MX_I2C3_Init();
   MX_LTDC_Init();
   MX_USB_DEVICE_Init();
   MX_SPI5_Init();
   /* USER CODE BEGIN 2 */
   AudioEngine_Init();
-  GUI_Init();
+  AudioEngine_SetWaveType(TRIANGLE_WAVE);
+  //GUI_Init();
+
+  //AudioEngine_PlayNote(69, 440.0f);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  while (1)
-  {
-	  GUI_HandleTouch();
-	  HAL_Delay(10);
-	  /* USER CODE END WHILE */
+  /* USER CODE BEGIN WHILE */
+    while (1)
+    {
+    /* USER CODE END WHILE */
 
-	  /* USER CODE BEGIN 3 */
-  }
+    /* USER CODE BEGIN 3 */
+
+          if (HAL_GetTick() - last_button_check_time >= 20) {
+              last_button_check_time = HAL_GetTick();
+
+              if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET) {
+
+                  if (is_button_pressed == 0) {
+                      is_button_pressed = 1;
+                      is_music_playing = !is_music_playing;
+                      HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
+                  }
+              }
+              else {
+                  is_button_pressed = 0;
+              }
+          }
+
+          if (is_music_playing) {
+
+          	uint8_t test_notes[] = {60, 62, 64, 65, 67, 69, 71, 72};
+
+              for (int i = 0; i < 8; i++) {
+
+                  AudioEngine_PlayNote(test_notes[i], MIDINoteToFrequency(test_notes[i]));
+
+                  for(int k=0; k<50; k++) {
+                      HAL_Delay(10);
+
+                      if (!is_music_playing || (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET && is_button_pressed == 0)) {
+                          is_music_playing = 0;
+                          is_button_pressed = 1;
+                          break;
+                      }
+                  }
+                  if(!is_music_playing) { AudioEngine_StopNote(test_notes[i]); break; }
+
+                  AudioEngine_StopNote(test_notes[i]);
+
+                  for(int k=0; k<10; k++) {
+                      HAL_Delay(10);
+                      if (!is_music_playing || (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET && is_button_pressed == 0)) {
+                          is_music_playing = 0;
+                          is_button_pressed = 1;
+                          break;
+                      }
+                  }
+                  if(!is_music_playing) break;
+              }
+
+              if(is_music_playing) HAL_Delay(500);
+          }
+    }
   /* USER CODE END 3 */
 }
 
@@ -265,7 +321,7 @@ static void MX_DAC_Init(void)
 
   /** DAC channel OUT2 config
   */
-  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_Trigger = DAC_TRIGGER_T6_TRGO;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_2) != HAL_OK)
   {
@@ -480,9 +536,9 @@ static void MX_TIM6_Init(void)
 
   /* USER CODE END TIM6_Init 1 */
   htim6.Instance = TIM6;
-  htim6.Init.Prescaler = 62;
+  htim6.Init.Prescaler = 0;
   htim6.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim6.Init.Period = 65535;
+  htim6.Init.Period = 1904;
   htim6.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim6) != HAL_OK)
   {
@@ -516,7 +572,7 @@ static void MX_USART1_UART_Init(void)
 
   /* USER CODE END USART1_Init 1 */
   huart1.Instance = USART1;
-  huart1.Init.BaudRate = 31250;
+  huart1.Init.BaudRate = 115200;
   huart1.Init.WordLength = UART_WORDLENGTH_8B;
   huart1.Init.StopBits = UART_STOPBITS_1;
   huart1.Init.Parity = UART_PARITY_NONE;
@@ -697,29 +753,29 @@ static void MX_GPIO_Init(void)
   */
 void USBD_MIDI_OnPacketsReceived(uint8_t *data, uint8_t len)
 {
-  // (Każdy pakiet MIDI ma 4 bajty)
+  // Pakiet MIDI ma 4 bajty
   for (uint16_t i = 0; i < len; i += 4)
   {
     uint8_t cable = data[i + 0] >> 4;     // Numer portu (kabla)
     uint8_t code = data[i + 0] & 0x0F;    // Code Index Number (CIN)
     uint8_t message = data[i + 1] >> 4;   // Wiadomość (0x9 = Note On, 0x8 = Note Off)
     uint8_t channel = data[i + 1] & 0x0F; // Kanał MIDI
-    uint8_t note_num = data[i + 2];         // Pierwszy bajt danych (numer nuty)
-    uint8_t vel = data[i + 3];         // Drugi bajt danych (velocity)
+    uint8_t note_num = data[i + 2];       // Pierwszy bajt danych (numer nuty)
+    uint8_t vel = data[i + 3];         	  // Drugi bajt danych (velocity)
 
     const char* note_name =NOTE_NAMES[note_num % 12];
     int octave = (note_num / 12) - 1;
 
     if (message == 0x09 && vel > 0) // Note On
     {
-    	//float freq = MIDINoteToFrequency(note_num);
-    	//AudioEngine_PlayNote(note_num, freq);
+    	float freq = MIDINoteToFrequency(note_num);
+    	AudioEngine_PlayNote(note_num, freq);
     	printf("[MIDI] Note On: %s%d (Note: %d) | Vel: %d | Ch: %d\r\n", note_name, octave, note_num, vel, channel);
     }
     else if (message == 0x08 || (message == 0x09 && vel == 0)) // Note Off or velocity = 0
     {
     	printf("[MIDI] Note OFF: %s%d (Note: %d)\r\n", note_name, octave, note_num);
-    	//AudioEngine_StopNore(note_num);
+    	AudioEngine_StopNote(note_num);
     }
   }
 }
