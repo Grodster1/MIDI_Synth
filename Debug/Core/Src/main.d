@@ -58,7 +58,6 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811.h \
  ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/ts.h \
  ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/io.h \
- ../Drivers/BSP/my_Board/project_conf.h \
  ../Drivers/BSP/my_Board/stm32f429i_discovery_io.h \
  ../Drivers/BSP/my_Board/stm32f429i_discovery_sdram.h \
  ../Drivers/BSP/my_Board/stm32f429i_discovery.h \
@@ -129,7 +128,6 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/BSP/my_Board/../Components/stmpe811/stmpe811.h:
 ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/ts.h:
 ../Drivers/BSP/my_Board/../Components/stmpe811/../Common/io.h:
-../Drivers/BSP/my_Board/project_conf.h:
 ../Drivers/BSP/my_Board/stm32f429i_discovery_io.h:
 ../Drivers/BSP/my_Board/stm32f429i_discovery_sdram.h:
 ../Drivers/BSP/my_Board/stm32f429i_discovery.h:

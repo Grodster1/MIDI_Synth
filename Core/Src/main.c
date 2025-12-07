@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include "audio_engine.h"
 #include "gui.h"
-#include "project_conf.h"
 #include "stm32f429i_discovery_io.h"
 #include "stm32f429i_discovery_lcd.h"
 #include "stm32f429i_discovery_sdram.h"
