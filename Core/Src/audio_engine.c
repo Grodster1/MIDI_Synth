@@ -11,7 +11,7 @@
 
 #define SAMPLE_RATE 44100
 #define AUDIO_BUFFER_SIZE 256
-#define MAX_AMPLITUDE 1800.0f
+#define MAX_AMPLITUDE 800.0f
 
 typedef struct{
 	uint8_t active;
