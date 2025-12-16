@@ -183,11 +183,11 @@ void GUI_HandleTouch(void) {
                 uint8_t midi_note = ((synth.current_octave + 1) * 12) + semitones[key_index];
 
                 /* Calculate frequency and play note */
-                float freq = MIDINoteToFrequency(midi_note);
+                //float freq = MIDINoteToFrequency(midi_note);
                 /* Audio Enigne func */
 
                 /* Highlight pressed key */
-                BSP_LCD_SetTextColor(LCD_COLOR_YELLOW);
+                BSP_LCD_SetTextColor(LCD_COLOR_GRAY);
                 BSP_LCD_FillRect(1 + (key_index * key_width), Y_PIANO_KEYS, key_width, H_PIANO_KEYS);
 
                 /* Hold the note */

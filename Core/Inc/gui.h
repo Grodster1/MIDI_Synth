@@ -44,4 +44,5 @@ void GUI_DrawInterface(void);
   */
 void GUI_HandleTouch(void);
 
+
 #endif /* GUI_H */

@@ -176,24 +176,29 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI5_Init();
   /* USER CODE BEGIN 2 */
-  AudioEngine_Init();
-  AudioEngine_SetWaveType(TRIANGLE_WAVE);
-  //GUI_Init();
-
+  //AudioEngine_Init();
+  //AudioEngine_SetWaveType(TRIANGLE_WAVE);
+  GUI_Init();
   //AudioEngine_PlayNote(69, 440.0f);
 
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  /* USER CODE BEGIN WHILE */
+
     while (1)
     {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+    	GUI_HandleTouch();
+    	HAL_Delay(5);
 
-          if (HAL_GetTick() - last_button_check_time >= 20) {
+
+
+
+
+          /*if (HAL_GetTick() - last_button_check_time >= 20) {
               last_button_check_time = HAL_GetTick();
 
               if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET) {
@@ -242,7 +247,7 @@ int main(void)
               }
 
               if(is_music_playing) HAL_Delay(500);
-          }
+          }*/
     }
   /* USER CODE END 3 */
 }
@@ -768,13 +773,13 @@ void USBD_MIDI_OnPacketsReceived(uint8_t *data, uint8_t len)
     if (message == 0x09 && vel > 0) // Note On
     {
     	float freq = MIDINoteToFrequency(note_num);
-    	AudioEngine_PlayNote(note_num, freq);
+    	//AudioEngine_PlayNote(note_num, freq);
     	printf("[MIDI] Note On: %s%d (Note: %d) | Vel: %d | Ch: %d\r\n", note_name, octave, note_num, vel, channel);
     }
     else if (message == 0x08 || (message == 0x09 && vel == 0)) // Note Off or velocity = 0
     {
     	printf("[MIDI] Note OFF: %s%d (Note: %d)\r\n", note_name, octave, note_num);
-    	AudioEngine_StopNote(note_num);
+    	//AudioEngine_StopNote(note_num);
     }
   }
 }

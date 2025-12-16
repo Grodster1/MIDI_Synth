@@ -136,7 +136,7 @@ uint8_t BSP_TS_ITGetStatus(void)
   * @brief  Returns status and positions of the touch screen.
   * @param  TsState: Pointer to touch screen current state structure
   */
-void BSP_TS_GetState(TS_StateTypeDef *TsState)
+void BSP_TS_GetState(TS_StateTypeDef *TsState)  // fiz needed?
 {
   uint16_t x_raw, y_raw;
 
@@ -149,7 +149,8 @@ void BSP_TS_GetState(TS_StateTypeDef *TsState)
     TsDrv->GetXY(TS_I2C_ADDRESS, &x_raw, &y_raw);
 
     /* Convert data */
-    TsState->X = (uint16_t)((uint32_t)x_raw * 240 / 4096);
+    if(x_raw > 4096) x_raw = 4096;
+    TsState->X = (uint16_t)((uint32_t)(4096 - x_raw) * 240 / 4096);
     TsState->Y = (uint16_t)((uint32_t)y_raw * 320 / 4096);
   }
   else

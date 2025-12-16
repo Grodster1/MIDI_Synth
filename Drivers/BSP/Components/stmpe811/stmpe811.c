@@ -105,24 +105,18 @@ void stmpe811_TS_GetXY(uint16_t DeviceAddr, uint16_t *X, uint16_t *Y)
 {
   uint8_t dataXYZ[4];
 
-  /* WAŻNE: Czytamy 4 bajty w JEDNEJ transakcji (Burst Read).
-     Czytanie ich osobno (po 1 bajcie) powoduje błędy pozycji!
-     Startujemy od rejestru 0x4D (TSC_DATA_X) */
+  /* Czytamy 4 bajty: X_MSB, X_LSB, Y_MSB, Y_LSB */
   I2Cx_ReadBuffer(DeviceAddr, STMPE811_TSC_DATA_X_REG, dataXYZ, 4);
 
-  /* Obliczenia:
-     Byte 0: X [11:4]
-     Byte 1: X [3:0] | Y [11:8]
-     Byte 2: Y [7:0]
-  */
-  uint32_t valX = (dataXYZ[0] << 4) | ((dataXYZ[1] & 0xF0) >> 4);
-  uint32_t valY = ((dataXYZ[1] & 0x0F) << 8) | dataXYZ[2];
+  /* Poprawne obliczenia (złożenie dwóch bajtów w 16-bitową liczbę) */
+  uint32_t valX = (dataXYZ[0] << 8) | dataXYZ[1];
+  uint32_t valY = (dataXYZ[2] << 8) | dataXYZ[3];
 
   /* Przypisanie do wskaźników */
   *X = (uint16_t)valX;
   *Y = (uint16_t)valY;
 
-  /* Reset FIFO, aby przygotować układ na kolejny odczyt */
+  /* Reset FIFO */
   stmpe811_WriteReg(DeviceAddr, STMPE811_FIFO_STA_REG, 0x01); /* Reset */
   stmpe811_WriteReg(DeviceAddr, STMPE811_FIFO_STA_REG, 0x00); /* Enable */
 }

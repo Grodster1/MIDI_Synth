@@ -1,3 +1,3 @@
 ../Core/Src/gui.c:33:6:GUI_Init	8	static
 ../Core/Src/gui.c:68:6:GUI_DrawInterface	96	static
-../Core/Src/gui.c:127:6:GUI_HandleTouch	80	static
+../Core/Src/gui.c:127:6:GUI_HandleTouch	72	static
