@@ -11,24 +11,22 @@ extern void I2Cx_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
 /* UI Layout Constants  */
 #define Y_WAVE_BTNS     20
 #define Y_OCTAVE_BTNS   80
+
+/* Piano Layout Constants */
 #define Y_PIANO_KEYS    150
-#define H_PIANO_KEYS    170
+#define W_WHITE         34      // Szerokość białego klawisza
+#define H_WHITE         170     // Wysokość białego klawisza
+#define W_BLACK         20      // Szerokość czarnego klawisza
+#define H_BLACK         100     // Wysokość czarnego klawisza
 
 /* Global variables */
-/**
-  * @brief Global synthesizer state instance.
-  * Initialized to Octave 4, Waveform 0 (Sine).
-  */
 SynthState synth = {4, 0, 0};
 
+/* Note labels (Global so HandleTouch can access them for redraw) */
+const char* notes[] = {"C", "D", "E", "F", "G", "A", "H"};
 
 /**
   * @brief  Initializes the LCD and Touch Screen hardware.
-  * This function performs the specific startup sequence required
-  * for the STM32F429I-Discovery board, including a workaround
-  * to wake up the STMPE811 controller.
-  * @param  None
-  * @retval None
   */
 void GUI_Init(void) {
     /* Initialize LCD */
@@ -61,152 +59,221 @@ void GUI_Init(void) {
 
 /**
   * @brief  Redraws the graphical user interface elements.
-  * Updates buttons colors based on the current state.
-  * @param  None
-  * @retval None
   */
 void GUI_DrawInterface(void) {
-
     char buf[20];
     const char* waves[] = {"SIN", "SQU", "SAW", "TRI"};
 
+    /* --- Waveform Buttons --- */
     for(int i = 0; i < 4; i++) {
-        /* Highlight the selected waveform */
         if(synth.current_waveform == i) {
             BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
         } else {
             BSP_LCD_SetTextColor(LCD_COLOR_LIGHTGRAY);
         }
-
-        /* Draw button rectangle */
         BSP_LCD_FillRect(10 + (i * 55), Y_WAVE_BTNS, 50, 40);
 
-        /* Draw button text */
         BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
         BSP_LCD_SetBackColor(synth.current_waveform == i ? LCD_COLOR_GREEN : LCD_COLOR_LIGHTGRAY);
         BSP_LCD_DisplayStringAt(20 + (i * 55), Y_WAVE_BTNS + 12, (uint8_t*)waves[i], LEFT_MODE);
     }
-
-    /* Reset background color */
     BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
 
-    /* Draw '-' and '+' buttons */
+    /* --- Octave Buttons --- */
     BSP_LCD_SetTextColor(LCD_COLOR_LIGHTBLUE);
-    BSP_LCD_FillRect(10, Y_OCTAVE_BTNS, 60, 40);  // Minus button
-    BSP_LCD_FillRect(170, Y_OCTAVE_BTNS, 60, 40); // Plus button
+    BSP_LCD_FillRect(10, Y_OCTAVE_BTNS, 60, 40);
+    BSP_LCD_FillRect(170, Y_OCTAVE_BTNS, 60, 40);
 
     BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
     BSP_LCD_SetBackColor(LCD_COLOR_LIGHTBLUE);
     BSP_LCD_DisplayStringAt(30, Y_OCTAVE_BTNS + 10, (uint8_t*)"-", LEFT_MODE);
     BSP_LCD_DisplayStringAt(190, Y_OCTAVE_BTNS + 10, (uint8_t*)"+", LEFT_MODE);
 
-    /* Display current octave number */
     BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
     sprintf(buf, "OCTAVE: %d", synth.current_octave);
     BSP_LCD_DisplayStringAt(0, Y_OCTAVE_BTNS + 12, (uint8_t*)buf, CENTER_MODE);
 
-    /* Draw Piano Keys */
-    const char* notes[] = {"C", "D", "E", "F", "G", "A", "H"};
-    int key_width = 34;
+    /* --- Piano Keys --- */
+
+    /* White Keys */
+    for(int i = 0; i < 7; i++) {
+        // Clear
+        BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+        BSP_LCD_FillRect(1 + (i * W_WHITE), Y_PIANO_KEYS, W_WHITE, H_WHITE);
+
+        // Draw
+        BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+        BSP_LCD_DrawRect(1 + (i * W_WHITE), Y_PIANO_KEYS, W_WHITE, H_WHITE);
+        BSP_LCD_DisplayStringAt(10 + (i * W_WHITE), Y_PIANO_KEYS + 140, (uint8_t*)notes[i], LEFT_MODE);
+    }
+
+    /* Black Keys */
+    int has_black[] = {1, 1, 0, 1, 1, 1, 0}; // C#, D#, -, F#, G#, A#, -
+
+    BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+    BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
 
     for(int i = 0; i < 7; i++) {
-        BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-        /* Draw key outline */
-        BSP_LCD_DrawRect(1 + (i * key_width), Y_PIANO_KEYS, key_width, H_PIANO_KEYS);
-        /* Draw key label */
-        BSP_LCD_DisplayStringAt(10 + (i * key_width), Y_PIANO_KEYS + 140, (uint8_t*)notes[i], LEFT_MODE);
+        if(has_black[i]) {
+            int x_pos = 1 + ((i + 1) * W_WHITE) - (W_BLACK / 2);
+            BSP_LCD_FillRect(x_pos, Y_PIANO_KEYS, W_BLACK, H_BLACK);
+        }
     }
+    BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
 }
 
 /**
-  * @brief  Polls the Touch Screen state and executes actions based on touch coordinates.
-  * Manages button presses (Waveform/Octave) and piano key events.
-  * @param  None
-  * @retval None
+  * @brief  Polls the Touch Screen state.
   */
 void GUI_HandleTouch(void) {
-
     TS_StateTypeDef TS_State;
-
-    /*  Get current touch state */
     BSP_TS_GetState(&TS_State);
 
     if (TS_State.TouchDetected) {
         uint16_t x = TS_State.X;
         uint16_t y = TS_State.Y;
 
-        /* Waveforms */
+        /* --- Waveforms --- */
         if (y >= Y_WAVE_BTNS && y <= Y_WAVE_BTNS + 40) {
             for(int i = 0; i < 4; i++) {
-                /* Check X bounds for each button */
                 if(x >= 10 + (i * 55) && x <= 60 + (i * 55)) {
                     synth.current_waveform = i;
-
-                    /* Audio Engine func */
-
-                    /* Refresh UI to show selection */
                     GUI_DrawInterface();
-
-                    /* Debounce delay */
                     HAL_Delay(150);
                     return;
                 }
             }
         }
 
-        /* Octave */
+        /* --- Octave --- */
         if (y >= Y_OCTAVE_BTNS && y <= Y_OCTAVE_BTNS + 40) {
-            /* Check Minus Button */
             if (x >= 10 && x <= 70) {
                 if(synth.current_octave > 1) synth.current_octave--;
             }
-            /* Check Plus Button */
             else if (x >= 170 && x <= 230) {
                 if(synth.current_octave < 7) synth.current_octave++;
             }
-
             GUI_DrawInterface();
-            HAL_Delay(150);
+
+            /* Wait for release */
+            do {
+                BSP_TS_GetState(&TS_State);
+                HAL_Delay(10);
+            } while(TS_State.TouchDetected);
+
             return;
         }
 
-        /* Piano Keys */
+        /* --- Piano Keys Logic --- */
         if (y >= Y_PIANO_KEYS) {
-            int key_width = 34;
-            int key_index = x / key_width; // Calculates index 0..6
 
-            if (key_index >= 0 && key_index <= 6) {
-                /* Adding semitones */
-                int semitones[] = {0, 2, 4, 5, 7, 9, 11};
+            int note_semitone = -1;
+            int is_black = 0;
+            int draw_idx = -1;
 
-                /* Calculate MIDI Note Number */
-                uint8_t midi_note = ((synth.current_octave + 1) * 12) + semitones[key_index];
+            int has_black[] = {1, 1, 0, 1, 1, 1, 0};
+            int black_vals[] = {1, 3, -1, 6, 8, 10, -1};
+            int white_vals[] = {0, 2, 4, 5, 7, 9, 11};
 
-                /* Calculate frequency and play note */
-                //float freq = MIDINoteToFrequency(midi_note);
-                /* Audio Enigne func */
+            /* Black Keys */
+            if (y <= Y_PIANO_KEYS + H_BLACK) {
+                for (int i = 0; i < 6; i++) {
+                    if (has_black[i]) {
+                        int center_x = 1 + ((i + 1) * W_WHITE);
+                        if (x >= (center_x - W_BLACK/2) && x <= (center_x + W_BLACK/2)) {
+                            note_semitone = black_vals[i];
+                            draw_idx = i;
+                            is_black = 1;
+                            break;
+                        }
+                    }
+                }
+            }
 
-                /* Highlight pressed key */
-                BSP_LCD_SetTextColor(LCD_COLOR_GRAY);
-                BSP_LCD_FillRect(1 + (key_index * key_width), Y_PIANO_KEYS, key_width, H_PIANO_KEYS);
+            /* White Keys */
+            if (note_semitone == -1) {
+                int white_idx = x / W_WHITE;
+                if (white_idx >= 0 && white_idx <= 6) {
+                    note_semitone = white_vals[white_idx];
+                    draw_idx = white_idx;
+                    is_black = 0;
+                }
+            }
 
-                /* Hold the note */
+            /* Execute */
+            if (note_semitone != -1) {
+
+                uint8_t midi_note = ((synth.current_octave + 1) * 12) + note_semitone;
+
+                /* --- AUDIO ON FUNC HERE --- */
+
+                /* Highlight */
+                if (is_black) {
+                    BSP_LCD_SetTextColor(LCD_COLOR_RED);
+                    int x_pos = 1 + ((draw_idx + 1) * W_WHITE) - (W_BLACK / 2);
+                    BSP_LCD_FillRect(x_pos, Y_PIANO_KEYS, W_BLACK, H_BLACK);
+                }
+                else {
+                    // White Key pressed
+                    BSP_LCD_SetTextColor(LCD_COLOR_GRAY);
+                    BSP_LCD_FillRect(1 + (draw_idx * W_WHITE), Y_PIANO_KEYS, W_WHITE, H_WHITE);
+
+                    // Restore Black Keys
+                    BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+                    if (draw_idx > 0 && has_black[draw_idx - 1]) {
+                         int x_left = 1 + (draw_idx * W_WHITE) - (W_BLACK / 2);
+                         BSP_LCD_FillRect(x_left, Y_PIANO_KEYS, W_BLACK, H_BLACK);
+                    }
+                    if (draw_idx < 6 && has_black[draw_idx]) {
+                         int x_right = 1 + ((draw_idx + 1) * W_WHITE) - (W_BLACK / 2);
+                         BSP_LCD_FillRect(x_right, Y_PIANO_KEYS, W_BLACK, H_BLACK);
+                    }
+                }
+
+                /* Wait for release */
                 do {
                     BSP_TS_GetState(&TS_State);
                     HAL_Delay(5);
                 } while(TS_State.TouchDetected);
 
-                /* Stop the note */
-                /* Audio Engine func */
+                /* --- AUDIO OFF FUNC HERE --- */
 
-                /* Remove visual highlight */
-                BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-                BSP_LCD_FillRect(1 + (key_index * key_width) + 1, Y_PIANO_KEYS + 1, key_width - 2, H_PIANO_KEYS - 2);
+                /* Restore */
+                if (is_black) {
+                    // Black Keys
+                    BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+                    int x_pos = 1 + ((draw_idx + 1) * W_WHITE) - (W_BLACK / 2);
+                    BSP_LCD_FillRect(x_pos, Y_PIANO_KEYS, W_BLACK, H_BLACK);
+                }
+                else {
+                    // White Keys
 
-                /* Restore grid */
-                GUI_DrawInterface();
+                	// Clear
+                    BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+                    BSP_LCD_FillRect(1 + (draw_idx * W_WHITE), Y_PIANO_KEYS, W_WHITE, H_WHITE);
+
+                    // Draw
+                    BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+                    BSP_LCD_DrawRect(1 + (draw_idx * W_WHITE), Y_PIANO_KEYS, W_WHITE, H_WHITE);
+
+                    BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
+                    BSP_LCD_DisplayStringAt(10 + (draw_idx * W_WHITE), Y_PIANO_KEYS + 140, (uint8_t*)notes[draw_idx], LEFT_MODE);
+
+                    // Redraw Black
+                    BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+                    BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+
+                    if (draw_idx > 0 && has_black[draw_idx - 1]) {
+                         int x_left = 1 + (draw_idx * W_WHITE) - (W_BLACK / 2);
+                         BSP_LCD_FillRect(x_left, Y_PIANO_KEYS, W_BLACK, H_BLACK);
+                    }
+                    if (draw_idx < 6 && has_black[draw_idx]) {
+                         int x_right = 1 + ((draw_idx + 1) * W_WHITE) - (W_BLACK / 2);
+                         BSP_LCD_FillRect(x_right, Y_PIANO_KEYS, W_BLACK, H_BLACK);
+                    }
+                    BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
+                }
             }
         }
     }
 }
-
