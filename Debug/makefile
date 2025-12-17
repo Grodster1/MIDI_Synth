@@ -92,8 +92,8 @@ all: main-build
 main-build: MIDI_Synth_v2.elf secondary-outputs
 
 # Tool invocations
-MIDI_Synth_v2.elf MIDI_Synth_v2.map: $(OBJS) $(USER_OBJS) /home/radek/Pulpit/Studia/sem_5/SR/Projekt/MIDI_Synth/STM32F429ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-g++ -o "MIDI_Synth_v2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/radek/Pulpit/Studia/sem_5/SR/Projekt/MIDI_Synth/STM32F429ZITX_FLASH.ld" -Wl,-Map="MIDI_Synth_v2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
+MIDI_Synth_v2.elf MIDI_Synth_v2.map: $(OBJS) $(USER_OBJS) C:\Users\wiku2\STM32CubeIDE\workspace_1.19.0\MIDI_TEST\STM32F429ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-g++ -o "MIDI_Synth_v2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\wiku2\STM32CubeIDE\workspace_1.19.0\MIDI_TEST\STM32F429ZITX_FLASH.ld" -Wl,-Map="MIDI_Synth_v2.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -lstdc++ -lsupc++ -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

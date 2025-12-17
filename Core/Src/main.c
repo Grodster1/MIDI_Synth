@@ -176,9 +176,16 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI5_Init();
   /* USER CODE BEGIN 2 */
+<<<<<<< HEAD
   //AudioEngine_Init();
   //AudioEngine_SetWaveType(TRIANGLE_WAVE);
   GUI_Init();
+=======
+  AudioEngine_Init();
+  AudioEngine_SetWaveType(TRIANGLE_WAVE);
+  GUI_Init();
+
+>>>>>>> a931adacadd26c2ba75063be078a8d2408f3d825
   //AudioEngine_PlayNote(69, 440.0f);
 
   /* USER CODE END 2 */
@@ -192,6 +199,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     	GUI_HandleTouch();
+<<<<<<< HEAD
     	HAL_Delay(5);
 
 
@@ -248,6 +256,9 @@ int main(void)
 
               if(is_music_playing) HAL_Delay(500);
           }*/
+=======
+    	PlayDemo();
+>>>>>>> a931adacadd26c2ba75063be078a8d2408f3d825
     }
   /* USER CODE END 3 */
 }
@@ -748,6 +759,86 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void PlayDemo(){
+	if (HAL_GetTick() - last_button_check_time >= 20) {
+	    last_button_check_time = HAL_GetTick();
+
+	    if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET) {
+	        if (is_button_pressed == 0) {
+	            is_button_pressed = 1;
+	            is_music_playing = !is_music_playing;
+
+	            HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, is_music_playing ? GPIO_PIN_SET : GPIO_PIN_RESET);
+	        }
+	    }
+	    else {
+	        is_button_pressed = 0;
+	    }
+	}
+
+	if (is_music_playing) {
+
+	    uint8_t test_notes[] = {60, 62, 64, 65, 67, 69, 71, 72};
+
+	    for (int i = 0; i < 8; i++) {
+
+	        if (!is_music_playing) break;
+
+	        AudioEngine_PlayNote(test_notes[i], MIDINoteToFrequency(test_notes[i]));
+
+	        // Pętla trwania nuty
+	        for(int k=0; k<50; k++) {
+	            HAL_Delay(10);
+
+
+	            if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET) {
+	                if(is_button_pressed == 0) {
+	                    is_button_pressed = 1;
+	                    is_music_playing = 0;
+
+	                    HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+	                    AudioEngine_StopNote(test_notes[i]);
+	                    break;
+	                }
+	            } else {
+	                 is_button_pressed = 0;
+	            }
+
+	            if (!is_music_playing) break;
+	        }
+
+	        AudioEngine_StopNote(test_notes[i]);
+	        if (!is_music_playing) break;
+
+	        for(int k=0; k<10; k++) {
+	            HAL_Delay(10);
+	            if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET) {
+	                 if(is_button_pressed == 0) {
+	                    is_button_pressed = 1;
+	                    is_music_playing = 0;
+	                    HAL_GPIO_WritePin(LD3_GPIO_Port, LD3_Pin, GPIO_PIN_RESET);
+	                    break;
+	                 }
+	            } else {
+	                 is_button_pressed = 0;
+	            }
+
+	            if (!is_music_playing) break;
+	        }
+
+	        if (!is_music_playing) break;
+	    }
+
+	    if(is_music_playing) HAL_Delay(500);
+	    else {
+	        AudioEngine_StopNote(test_notes[0]);
+	    }
+	}
+}
+
+
+
 
 /**
   * @brief  Obsługa pakietów MIDI otrzymanych z hosta (np. DAW).
