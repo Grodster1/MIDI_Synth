@@ -1,9 +1,0 @@
-../Core/Src/audio_engine.c:32:6:AudioEngine_Init	24	static
-../Core/Src/audio_engine.c:63:15:find_free_voice	48	static
-../Core/Src/audio_engine.c:86:6:AudioEngine_PlayNote	24	static
-../Core/Src/audio_engine.c:95:6:AudioEngine_StopNote	24	static
-../Core/Src/audio_engine.c:104:6:AudioEngine_ProcessBuffer	8	static
-../Core/Src/audio_engine.c:108:6:AudioEngine_SetWaveType	16	static
-../Core/Src/audio_engine.c:119:6:fill_audio_buffer	40	static
-../Core/Src/audio_engine.c:192:6:HAL_DACEx_ConvHalfCpltCallbackCh2	16	static
-../Core/Src/audio_engine.c:199:6:HAL_DACEx_ConvCpltCallbackCh2	16	static

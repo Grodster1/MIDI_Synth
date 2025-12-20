@@ -1,7 +1,0 @@
-../Drivers/BSP/my_Board/stm32f429i_discovery_io.c:90:9:BSP_IO_Init	3
-../Drivers/BSP/my_Board/stm32f429i_discovery_io.c:116:9:BSP_IO_ITGetStatus	1
-../Drivers/BSP/my_Board/stm32f429i_discovery_io.c:125:6:BSP_IO_ITClear	1
-../Drivers/BSP/my_Board/stm32f429i_discovery_io.c:144:6:BSP_IO_ConfigPin	1
-../Drivers/BSP/my_Board/stm32f429i_discovery_io.c:156:6:BSP_IO_WritePin	1
-../Drivers/BSP/my_Board/stm32f429i_discovery_io.c:168:10:BSP_IO_ReadPin	1
-../Drivers/BSP/my_Board/stm32f429i_discovery_io.c:178:6:BSP_IO_TogglePin	2

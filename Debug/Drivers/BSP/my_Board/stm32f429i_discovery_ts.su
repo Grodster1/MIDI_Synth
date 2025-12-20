@@ -1,5 +1,0 @@
-../Drivers/BSP/my_Board/stm32f429i_discovery_ts.c:86:9:BSP_TS_Init	24	static
-../Drivers/BSP/my_Board/stm32f429i_discovery_ts.c:117:9:BSP_TS_ITConfig	8	static
-../Drivers/BSP/my_Board/stm32f429i_discovery_ts.c:129:9:BSP_TS_ITGetStatus	8	static
-../Drivers/BSP/my_Board/stm32f429i_discovery_ts.c:139:6:BSP_TS_GetState	24	static
-../Drivers/BSP/my_Board/stm32f429i_discovery_ts.c:167:6:BSP_TS_ITClear	8	static

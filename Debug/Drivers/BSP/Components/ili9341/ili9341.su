@@ -1,9 +1,0 @@
-../Drivers/BSP/Components/ili9341/ili9341.c:102:6:ili9341_Init	8	static
-../Drivers/BSP/Components/ili9341/ili9341.c:233:10:ili9341_ReadID	8	static
-../Drivers/BSP/Components/ili9341/ili9341.c:244:6:ili9341_DisplayOn	8	static
-../Drivers/BSP/Components/ili9341/ili9341.c:255:6:ili9341_DisplayOff	8	static
-../Drivers/BSP/Components/ili9341/ili9341.c:266:6:ili9341_WriteReg	16	static
-../Drivers/BSP/Components/ili9341/ili9341.c:276:6:ili9341_WriteData	16	static
-../Drivers/BSP/Components/ili9341/ili9341.c:287:10:ili9341_ReadData	16	static
-../Drivers/BSP/Components/ili9341/ili9341.c:298:10:ili9341_GetLcdPixelWidth	4	static
-../Drivers/BSP/Components/ili9341/ili9341.c:309:10:ili9341_GetLcdPixelHeight	4	static

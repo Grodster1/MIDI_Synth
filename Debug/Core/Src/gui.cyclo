@@ -1,3 +1,0 @@
-../Core/Src/gui.c:31:6:GUI_Init	1
-../Core/Src/gui.c:63:6:GUI_DrawInterface	7
-../Core/Src/gui.c:128:6:GUI_HandleTouch	37

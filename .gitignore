@@ -1,59 +1,30 @@
-# Created by https://www.toptal.com/developers/gitignore/api/c
-# Edit at https://www.toptal.com/developers/gitignore?templates=c
+# --- Foldery kompilacji (Build Results) ---
+Debug/
+Release/
+build/
+bin/
 
-### C ###
-# Prerequisites
-*.d
-
-# Object files
+# --- Pliki tymczasowe i binarne ---
 *.o
-*.ko
 *.obj
 *.elf
-
-# Linker output
-*.ilk
-*.map
-*.exp
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
+*.bin
 *.hex
-
-# Debug files
-*.dSYM/
+*.map
 *.su
-*.idb
-*.pdb
+*.d
+*.list
+*.ltrans
 
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-# End of https://www.toptal.com/developers/gitignore/api/c
+# --- Ustawienia IDE (STM32CubeIDE / Eclipse) ---
+.metadata/
 .settings/
+*.launch
+*.sc
+
+# --- VS Code ---
+.vscode/
+
+# --- Systemowe śmieci ---
+.DS_Store
+Thumbs.db
