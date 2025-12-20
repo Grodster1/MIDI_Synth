@@ -12,7 +12,8 @@
 #define SAMPLE_RATE 44100
 #define AUDIO_BUFFER_SIZE 256
 #define MAX_AMPLITUDE 600.0f
-#define RELEASE_SPEED 0.00005f
+#define RELEASE_SPEED 0.005f
+#define MAX_VOICES 8
 
 typedef struct{
 	uint8_t active;
@@ -126,100 +127,86 @@ void AudioEngine_SetWaveType(WaveType type){
  *
  */
 void fill_audio_buffer(uint16_t* buffer, uint16_t size){
+    for(int i = 0; i < size; ++i){
+        float mixed_sample = 0.0f;
+        int active_voices_count = 0;
 
-	for(int i = 0; i < size; ++i){
-		float mixed_sample = 0.0f;
-		int active_voices_count = 0;
+        for(int j = 0; j < MAX_VOICES; ++j){
+            if(voices[j].active && voices[j].amplitude > 0.0f){
+                active_voices_count++;
+            }
+        }
+        float normalization = (active_voices_count > 0) ?
+                              (1.0f / sqrtf((float)active_voices_count)) : 1.0f;
 
-		for(int j = 0; j < MAX_VOICES; ++j){
-			if(voices[j].active){
-				if(voices[j].note_on){
-					voices[j].amplitude = 1.0f;
-				}
-				else{
-					voices[j].amplitude -= RELEASE_SPEED;
-					if(voices[j].amplitude<=0){
-						voices[j].amplitude = 0.0f;
-						voices[j].active = 0;
-						continue;
-					}
-				}
+        for(int j = 0; j < MAX_VOICES; ++j){
+            if(voices[j].active){
+                // Envelope (Release)
+                if(voices[j].note_on){
+                    voices[j].amplitude = 1.0f;
+                }
+                else{
+                    voices[j].amplitude -= RELEASE_SPEED;
+                    if(voices[j].amplitude <= 0.0f){
+                        voices[j].amplitude = 0.0f;
+                        voices[j].active = 0;
+                        continue;
+                    }
+                }
 
-				float phase = voices[j].phase;
-				float sample_val = 0.0f;
+                float phase = voices[j].phase;
+                float sample_val = 0.0f;
 
-				switch(current_wave_type){
-				 case SIN_WAVE:
-					 sample_val += sinf(2.0f * M_PI * phase);
-					 break;
-				 case SQUARE_WAVE:
-					 sample_val = (phase < 0.5f) ? 1.0f : -1.0f;
-					 break;
-				 case SAWTOOTH_WAVE:
-					 sample_val = (2.0f * phase) - 1.0f;
-					 break;
-				 case TRIANGLE_WAVE:
-					 if(phase < 0.5f){
-						 sample_val = 4.0f*phase - 1.0f;
-					 }
-					 else{
-						 sample_val = -4.0f*phase + 3.0f;
-					 }
-					 break;
-				}
-				sample_val *= voices[j].amplitude;
-				sample_val *=MAX_AMPLITUDE;;
+                // Generowanie fali
+                switch(current_wave_type){
+                    case SIN_WAVE:
+                        sample_val = sinf(2.0f * M_PI * phase);
+                        break;
+                    case SQUARE_WAVE:
+                        sample_val = (phase < 0.5f) ? 1.0f : -1.0f;
+                        break;
+                    case SAWTOOTH_WAVE:
+                        sample_val = (2.0f * phase) - 1.0f;
+                        break;
+                    case TRIANGLE_WAVE:
+                        if(phase < 0.5f){
+                            sample_val = 4.0f * phase - 1.0f;
+                        }
+                        else{
+                            sample_val = -4.0f * phase + 3.0f;
+                        }
+                        break;
+                }
 
-				mixed_sample += sample_val;
+                sample_val *= voices[j].amplitude;
+                sample_val *= normalization;
+                sample_val *= MAX_AMPLITUDE;
 
-				voices[j].phase += voices[j].phase_step;
+                mixed_sample += sample_val;
 
-				if(voices[j].phase >= 1.0f){
-					voices[j].phase -= 1.0f;
-				}
-			}
-		}
+                // Aktualizuj fazę
+                voices[j].phase += voices[j].phase_step;
+                if(voices[j].phase >= 1.0f){
+                    voices[j].phase -= 1.0f;
+                }
+            }
+        }
 
-		int32_t final_value = 2048 + (int32_t)mixed_sample;
-		if (final_value > 4095) {
-			final_value = 4095;
-		}
-		else if (final_value < 0) {
-		    final_value = 0;
-		}
-		buffer[i] = (uint16_t)final_value;
-	}
+        float normalized = mixed_sample / MAX_AMPLITUDE;
+
+        normalized = tanhf(normalized);
+
+        mixed_sample = normalized * MAX_AMPLITUDE;
+
+        int32_t final_value = 2048 + (int32_t)mixed_sample;
+
+        if (final_value > 4095) final_value = 4095;
+        else if (final_value < 0) final_value = 0;
+
+        buffer[i] = (uint16_t)final_value;
+    }
 }
 
-//void HAL_DAC_ConvHalfCpltCallback(DAC_HandleTypeDef *hdac)
-//{
-//    if (hdac->Instance == DAC)
-//    {
-//        HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);
-//
-//        static uint32_t half_count = 0;
-//        half_count++;
-//        if(half_count % 1000 == 0) {
-//            printf("Half: %lu\r\n", half_count);
-//        }
-//
-//        fill_audio_buffer(&audio_buffer[0], AUDIO_BUFFER_SIZE / 2);
-//    }
-//}
-//
-//void HAL_DAC_ConvCpltCallback(DAC_HandleTypeDef *hdac)
-//{
-//    if (hdac->Instance == DAC)
-//    {
-//        static uint32_t full_count = 0;
-//        full_count++;
-//        if(full_count % 1000 == 0) {
-//            printf("Full: %lu\r\n", full_count);
-//        }
-//
-//        fill_audio_buffer(&audio_buffer[AUDIO_BUFFER_SIZE / 2], AUDIO_BUFFER_SIZE / 2);
-//    }
-//}
 
 void HAL_DACEx_ConvHalfCpltCallbackCh2(DAC_HandleTypeDef *hdac)
 {

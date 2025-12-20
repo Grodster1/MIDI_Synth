@@ -800,13 +800,13 @@ void USBD_MIDI_OnPacketsReceived(uint8_t *data, uint8_t len)
     if (message == 0x09 && vel > 0) // Note On
     {
     	float freq = AudioEngine_MIDINoteToFrequency(note_num);
-    	//AudioEngine_PlayNote(note_num, freq);
+    	AudioEngine_PlayNote(note_num, freq);
     	printf("[MIDI] Note On: %s%d (Note: %d) | Vel: %d | Ch: %d\r\n", note_name, octave, note_num, vel, channel);
     }
     else if (message == 0x08 || (message == 0x09 && vel == 0)) // Note Off or velocity = 0
     {
     	printf("[MIDI] Note OFF: %s%d (Note: %d)\r\n", note_name, octave, note_num);
-    	//AudioEngine_StopNote(note_num);
+    	AudioEngine_StopNote(note_num);
     }
   }
 }

@@ -10,8 +10,6 @@
 
 #include <stdint.h>
 
-#define MAX_VOICES 8
-
 
 typedef enum{
 	SIN_WAVE,
