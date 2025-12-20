@@ -1,5 +1,6 @@
 /* Includes */
 #include "gui.h"
+#include "audio_engine.h"
 #include <stdio.h>
 
 /* External function references */
@@ -137,7 +138,8 @@ void GUI_HandleTouch(void) {
         if (y >= Y_WAVE_BTNS && y <= Y_WAVE_BTNS + 40) {
             for(int i = 0; i < 4; i++) {
                 if(x >= 10 + (i * 55) && x <= 60 + (i * 55)) {
-                    synth.current_waveform = i;
+                	synth.current_waveform = i;
+                	AudioEngine_SetWaveType((WaveType)i);
                     GUI_DrawInterface();
                     HAL_Delay(150);
                     return;
@@ -206,7 +208,8 @@ void GUI_HandleTouch(void) {
                 uint8_t midi_note = ((synth.current_octave + 1) * 12) + note_semitone;
 
                 /* --- AUDIO ON FUNC HERE --- */
-
+                float freq = AudioEngine_MIDINoteToFrequency(midi_note);
+                AudioEngine_PlayNote(midi_note, freq);
                 /* Highlight */
                 if (is_black) {
                     BSP_LCD_SetTextColor(LCD_COLOR_RED);
@@ -237,7 +240,7 @@ void GUI_HandleTouch(void) {
                 } while(TS_State.TouchDetected);
 
                 /* --- AUDIO OFF FUNC HERE --- */
-
+                AudioEngine_StopNote(midi_note);
                 /* Restore */
                 if (is_black) {
                     // Black Keys

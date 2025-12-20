@@ -111,9 +111,6 @@ void I2C3_ClearBusyFlagErratum(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-float MIDINoteToFrequency(uint8_t note){
-	return 440.0f*powf(2.0f, (note - 69.0f)/12.0f);
-}
 
 int _write(int file, char *ptr, int len) {
     HAL_UART_Transmit(&huart1, (uint8_t *)ptr, len, HAL_MAX_DELAY);
@@ -176,16 +173,13 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI5_Init();
   /* USER CODE BEGIN 2 */
-<<<<<<< HEAD
   //AudioEngine_Init();
   //AudioEngine_SetWaveType(TRIANGLE_WAVE);
   GUI_Init();
-=======
   AudioEngine_Init();
   AudioEngine_SetWaveType(TRIANGLE_WAVE);
   GUI_Init();
 
->>>>>>> a931adacadd26c2ba75063be078a8d2408f3d825
   //AudioEngine_PlayNote(69, 440.0f);
 
   /* USER CODE END 2 */
@@ -199,66 +193,8 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
     	GUI_HandleTouch();
-<<<<<<< HEAD
     	HAL_Delay(5);
-
-
-
-
-
-          /*if (HAL_GetTick() - last_button_check_time >= 20) {
-              last_button_check_time = HAL_GetTick();
-
-              if (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET) {
-
-                  if (is_button_pressed == 0) {
-                      is_button_pressed = 1;
-                      is_music_playing = !is_music_playing;
-                      HAL_GPIO_TogglePin(LD3_GPIO_Port, LD3_Pin);
-                  }
-              }
-              else {
-                  is_button_pressed = 0;
-              }
-          }
-
-          if (is_music_playing) {
-
-          	uint8_t test_notes[] = {60, 62, 64, 65, 67, 69, 71, 72};
-
-              for (int i = 0; i < 8; i++) {
-
-                  AudioEngine_PlayNote(test_notes[i], MIDINoteToFrequency(test_notes[i]));
-
-                  for(int k=0; k<50; k++) {
-                      HAL_Delay(10);
-
-                      if (!is_music_playing || (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET && is_button_pressed == 0)) {
-                          is_music_playing = 0;
-                          is_button_pressed = 1;
-                          break;
-                      }
-                  }
-                  if(!is_music_playing) { AudioEngine_StopNote(test_notes[i]); break; }
-
-                  AudioEngine_StopNote(test_notes[i]);
-
-                  for(int k=0; k<10; k++) {
-                      HAL_Delay(10);
-                      if (!is_music_playing || (HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin) == GPIO_PIN_SET && is_button_pressed == 0)) {
-                          is_music_playing = 0;
-                          is_button_pressed = 1;
-                          break;
-                      }
-                  }
-                  if(!is_music_playing) break;
-              }
-
-              if(is_music_playing) HAL_Delay(500);
-          }*/
-=======
-    	PlayDemo();
->>>>>>> a931adacadd26c2ba75063be078a8d2408f3d825
+    	//PlayDemo();
     }
   /* USER CODE END 3 */
 }
@@ -785,7 +721,7 @@ void PlayDemo(){
 
 	        if (!is_music_playing) break;
 
-	        AudioEngine_PlayNote(test_notes[i], MIDINoteToFrequency(test_notes[i]));
+	        AudioEngine_PlayNote(test_notes[i], AudioEngine_MIDINoteToFrequency(test_notes[i]));
 
 	        // Pętla trwania nuty
 	        for(int k=0; k<50; k++) {
@@ -863,7 +799,7 @@ void USBD_MIDI_OnPacketsReceived(uint8_t *data, uint8_t len)
 
     if (message == 0x09 && vel > 0) // Note On
     {
-    	float freq = MIDINoteToFrequency(note_num);
+    	float freq = AudioEngine_MIDINoteToFrequency(note_num);
     	//AudioEngine_PlayNote(note_num, freq);
     	printf("[MIDI] Note On: %s%d (Note: %d) | Vel: %d | Ch: %d\r\n", note_name, octave, note_num, vel, channel);
     }
