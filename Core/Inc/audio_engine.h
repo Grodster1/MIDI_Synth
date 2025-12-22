@@ -18,6 +18,11 @@ typedef enum{
 	TRIANGLE_WAVE
 } WaveType;
 
+typedef enum{
+	TREMOLO,
+	VIBRATO
+} LFOMode;
+
 void AudioEngine_Init(void);
 void AudioEngine_PlayTestTone(void);
 void fill_audio_buffer(uint16_t* buffer, uint16_t size);
@@ -26,4 +31,5 @@ void AudioEngine_StopNote(uint8_t note);
 float AudioEngine_MIDINoteToFrequency(uint8_t note);
 void AudioEngine_ProcessBuffer(void);
 void AudioEngine_SetWaveType(WaveType type);
+void AudioEngine_SetLFOWaveType(WaveType type);
 #endif /* INC_AUDIO_ENGINE_H_ */

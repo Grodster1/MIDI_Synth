@@ -11,9 +11,19 @@
 
 #define SAMPLE_RATE 44100
 #define AUDIO_BUFFER_SIZE 256
-#define MAX_AMPLITUDE 600.0f
+#define MAX_AMPLITUDE 800.0f
 #define RELEASE_SPEED 0.005f
 #define MAX_VOICES 8
+
+typedef struct{
+	float rate;
+	float phase;
+	float phase_step;
+	float depth;
+	WaveType LFO_wave;
+	LFOMode mode;
+} LFO;
+
 
 typedef struct{
 	uint8_t active;
@@ -25,10 +35,12 @@ typedef struct{
 	uint32_t start_time;
 } Voice;
 
+static LFO lfo;
 static Voice voices[MAX_VOICES];
 static uint16_t audio_buffer[AUDIO_BUFFER_SIZE];
 static WaveType current_wave_type = SIN_WAVE;
-// Deklaracje zewnętrzne
+static WaveType current_LFO_wave_type = SIN_WAVE;
+
 extern DAC_HandleTypeDef hdac;
 extern TIM_HandleTypeDef htim6;
 
@@ -36,6 +48,15 @@ extern TIM_HandleTypeDef htim6;
 void AudioEngine_Init(void){
     // Clear voices
     memset(voices, 0, sizeof(voices));
+
+    //DODANO LFO
+    lfo.rate = 2.0f;
+    lfo.phase = 0.0f;
+    lfo.phase_step = lfo.rate/(float)SAMPLE_RATE;
+    lfo.depth = 0.1f;
+    lfo.LFO_wave = current_LFO_wave_type;
+    lfo.mode = TREMOLO;
+
 
     for(int i = 0; i < AUDIO_BUFFER_SIZE; i++){
         audio_buffer[i] = 2048; // Silence (middle point for 12-bit DAC)
@@ -93,7 +114,7 @@ void AudioEngine_PlayNote(uint8_t note, float frequency){
     voice->note = note;
     voice->note_on = 1;
     voice->phase = 0.0f;
-    voice->amplitude = MAX_AMPLITUDE * 1.0f;
+    voice->amplitude = 1.0f;
     voice->phase_step = frequency / (float)SAMPLE_RATE;
     voice->start_time = HAL_GetTick();
 }
@@ -119,6 +140,12 @@ void AudioEngine_SetWaveType(WaveType type){
 	current_wave_type = type;
 }
 
+void AudioEngine_SetLFOWaveType(WaveType type){
+	current_LFO_wave_type = type;
+}
+
+
+
 
 
 
@@ -130,6 +157,41 @@ void fill_audio_buffer(uint16_t* buffer, uint16_t size){
     for(int i = 0; i < size; ++i){
         float mixed_sample = 0.0f;
         int active_voices_count = 0;
+        float lfo_val = 0.0f;
+        float vibrato_mod = 1.0f;
+        float tremolo_mod = 1.0f;
+        //LFO
+        switch(current_LFO_wave_type){
+            case SIN_WAVE:
+            	lfo_val = sinf(2.0f*M_PI*lfo.phase);
+                break;
+            case SQUARE_WAVE:
+            	lfo_val = (lfo.phase < 0.5f) ? 1.0f : -1.0f;
+                break;
+            case SAWTOOTH_WAVE:
+            	lfo_val = (2.0f * lfo.phase) - 1.0f;
+                break;
+            case TRIANGLE_WAVE:
+                if(lfo.phase < 0.5f){
+                	lfo_val = 4.0f * lfo.phase - 1.0f;
+                }
+                else{
+                	lfo_val = -4.0f * lfo.phase + 3.0f;
+                }
+                break;
+        }
+        if(lfo.mode == VIBRATO){
+        	vibrato_mod = 1.0f + (lfo_val * lfo.depth);
+        }
+        else if(lfo.mode == TREMOLO){
+        	tremolo_mod = ((lfo_val*lfo.depth + 1.0) / 2.0);
+        }
+
+        //DODANE LFO
+        lfo.phase += lfo.phase_step;
+        if(lfo.phase >= 1.0f){
+        	lfo.phase -= 1.0f;
+        }
 
         for(int j = 0; j < MAX_VOICES; ++j){
             if(voices[j].active && voices[j].amplitude > 0.0f){
@@ -138,6 +200,8 @@ void fill_audio_buffer(uint16_t* buffer, uint16_t size){
         }
         float normalization = (active_voices_count > 0) ?
                               (1.0f / sqrtf((float)active_voices_count)) : 1.0f;
+
+
 
         for(int j = 0; j < MAX_VOICES; ++j){
             if(voices[j].active){
@@ -157,7 +221,6 @@ void fill_audio_buffer(uint16_t* buffer, uint16_t size){
                 float phase = voices[j].phase;
                 float sample_val = 0.0f;
 
-                // Generowanie fali
                 switch(current_wave_type){
                     case SIN_WAVE:
                         sample_val = sinf(2.0f * M_PI * phase);
@@ -179,13 +242,19 @@ void fill_audio_buffer(uint16_t* buffer, uint16_t size){
                 }
 
                 sample_val *= voices[j].amplitude;
+
+                //TREMOLO MODULATION
+                sample_val *= tremolo_mod;
                 sample_val *= normalization;
                 sample_val *= MAX_AMPLITUDE;
 
                 mixed_sample += sample_val;
 
+                //VIBRATO MODULATION
+                float current_step = voices[j].phase_step * vibrato_mod;
+
                 // Aktualizuj fazę
-                voices[j].phase += voices[j].phase_step;
+                voices[j].phase += current_step;
                 if(voices[j].phase >= 1.0f){
                     voices[j].phase -= 1.0f;
                 }
