@@ -32,4 +32,11 @@ float AudioEngine_MIDINoteToFrequency(uint8_t note);
 void AudioEngine_ProcessBuffer(void);
 void AudioEngine_SetWaveType(WaveType type);
 void AudioEngine_SetLFOWaveType(WaveType type);
+
+float AudioEngine_GetLFORate(void);
+float AudioEngine_GetLFODepth(void);
+LFOMode AudioEngine_GetLFOMode(void);
+WaveType AudioEngine_GetLFOWaveType(void);
+const char* AudioEngine_GetLFOWaveName(WaveType mode);
+const char* AudioEngine_GetLFOModeName(LFOMode mode);
 #endif /* INC_AUDIO_ENGINE_H_ */

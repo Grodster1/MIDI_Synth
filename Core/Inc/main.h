@@ -244,7 +244,7 @@ void Error_Handler(void);
 #define NBL1_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
-
+extern I2C_HandleTypeDef hi2c3;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

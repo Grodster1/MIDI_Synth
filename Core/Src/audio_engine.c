@@ -276,7 +276,43 @@ void fill_audio_buffer(uint16_t* buffer, uint16_t size){
     }
 }
 
+float AudioEngine_GetLFORate(void) {
+    return lfo.rate;
+}
 
+float AudioEngine_GetLFODepth(void) {
+    return lfo.depth;
+}
+
+LFOMode AudioEngine_GetLFOMode(void) {
+    return lfo.mode;
+}
+
+WaveType AudioEngine_GetLFOWaveType(void) {
+    return lfo.LFO_wave;
+}
+
+const char* AudioEngine_GetLFOWaveName(WaveType mode){
+	switch(mode){
+	case SIN_WAVE:
+		return "SIN";
+	case SQUARE_WAVE:
+		return "SQUARE";
+	case SAWTOOTH_WAVE:
+		return "SAWTOOTH";
+	case TRIANGLE_WAVE:
+		return "TRIANGLE";
+	}
+}
+
+const char* AudioEngine_GetLFOModeName(LFOMode mode){
+	switch(mode){
+	case TREMOLO:
+		return "TREMOLO";
+	case VIBRATO:
+		return "VIBRATO";
+	}
+}
 void HAL_DACEx_ConvHalfCpltCallbackCh2(DAC_HandleTypeDef *hdac)
 {
     HAL_GPIO_TogglePin(LD4_GPIO_Port, LD4_Pin);

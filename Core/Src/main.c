@@ -24,6 +24,7 @@
 /* USER CODE BEGIN Includes */
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include "audio_engine.h"
 #include "gui.h"
 #include "stm32f429i_discovery_io.h"
@@ -36,6 +37,7 @@
 #include "io.h"
 #include "lcd.h"
 #include "ts.h"
+#include "sh1106.h"
 
 /* USER CODE END Includes */
 
@@ -173,29 +175,50 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_SPI5_Init();
   /* USER CODE BEGIN 2 */
-  //AudioEngine_Init();
-  //AudioEngine_SetWaveType(TRIANGLE_WAVE);
+
+  SH1106_Init();
   GUI_Init();
   AudioEngine_Init();
   AudioEngine_SetWaveType(TRIANGLE_WAVE);
   GUI_Init();
 
-  //AudioEngine_PlayNote(69, 440.0f);
 
+  char display_buf[32];
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-    while (1)
-    {
+  while (1)
+  {
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    	GUI_HandleTouch();
-    	HAL_Delay(5);
-    	//PlayDemo();
-    }
+	  SH1106_Fill(0);
+
+	  float rate = AudioEngine_GetLFORate();
+	  float depth = AudioEngine_GetLFODepth();
+	  WaveType wave = AudioEngine_GetLFOWaveType();
+	  LFOMode mode = AudioEngine_GetLFOMode();
+
+	  sprintf(display_buf, "LFO Mode: %s", AudioEngine_GetLFOModeName(mode));
+	  SH1106_DrawString(0, 0, display_buf, &Font12, 1);
+
+	  sprintf(display_buf, "LFO Wave: %s", AudioEngine_GetLFOWaveName(wave));
+	  SH1106_DrawString(0, 15, display_buf, &Font12, 1);
+
+	  sprintf(display_buf, "LFO Rate: %.1f Hz", rate);
+	  SH1106_DrawString(0, 30, display_buf, &Font12, 1);
+
+	  sprintf(display_buf, "FLO Depth: %.2f", depth);
+	  SH1106_DrawString(0, 45, display_buf, &Font12, 1);
+
+
+	  SH1106_UpdateScreen();
+
+	  GUI_HandleTouch();
+	  HAL_Delay(100);
+  }
   /* USER CODE END 3 */
 }
 
